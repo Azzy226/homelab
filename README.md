@@ -12,7 +12,8 @@ Fiber -> ONT -> Router -> 8-port unmanaged switch
                             LAN 4-8  free
 ```
 
-Flat network. Router handles DHCP and NAT. Nothing forwarded from the WAN side.
+ Flat Net work Nothing forwarded from the WAN side yet. Planned: UDP 8211 to pal-001 for
+Palworld. RCON (TCP 25575) and REST API (TCP 8212) stay closed..
 
 ```mermaid
 flowchart LR
