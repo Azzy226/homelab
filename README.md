@@ -62,3 +62,27 @@ Daily driver.
 | RAM | 32 GB DDR4, going to 64 GB |
 | Disk | 1.82 TB |
 | OS | Windows 11, Kali Purple |
+
+## Update — Home Server (pal-001)
+
+**Hardware:** Lenovo ThinkPad E15 Gen 2 — Intel i5-1135G7 (4C/8T), 8GB RAM, 238GB NVMe
+
+**OS:** Ubuntu Server 26.04.1 LTS
+
+**Network:** ONT → router → 8-port switch → pal-001 (wired, static reservation planned)
+
+**Status: server is up and running — Palworld dedicated server is live and reachable**
+
+### Done
+- Fresh Ubuntu Server install
+- Fixed empty netplan config to bring up wired ethernet (enp4s0), replacing wifi-only setup
+- SSH access confirmed from desktop
+- Fixed lid-close behavior — closing the lid no longer suspends the machine (`/etc/systemd/logind.conf`)
+- Locked down firewall with ufw — SSH restricted to LAN (192.168.0.0/16) only, all other inbound denied by default
+- System fully updated
+- Palworld dedicated server running and connectable
+
+### Next
+- Router hardening (disable UPnP, change admin password, set DHCP reservation for pal-001)
+- Confirm UDP 8211 forward and firewall rule for Palworld specifically
+- Docker migration for services (optional)
