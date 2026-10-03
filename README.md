@@ -12,11 +12,11 @@ Fiber -> ONT -> Router -> 8-port unmanaged switch
                             LAN 4-8 free
 ```
 
-Flat network. Nothing is forwarded from the WAN side yet. Planned: UDP 8211 to
-pal-001 for Palworld. RCON (TCP 25575) and the REST API (TCP 8212) stay closed.
+Flat network. Only the Palworld game port is forwarded from the WAN side to
+pal-001; all management ports (RCON, the REST API, SSH) stay LAN-only.
 
-Firewall (pal-001): ufw enabled, SSH restricted to the LAN (192.168.0.0/16),
-all other inbound denied by default.
+Firewall (pal-001): ufw enabled, SSH restricted to the LAN subnet, all other
+inbound denied by default.
 
 ```mermaid
 flowchart LR
@@ -44,14 +44,14 @@ Palworld dedicated server live and reachable.
 | RAM | 8 GB (7.0 GiB usable), adding more soon |
 | Swap | 4 GB |
 | Disk | 238.5 GB NVMe, LVM, 232 GB root |
-| OS | Ubuntu Server 26.04.1 LTS, kernel 7.0.0-30 |
-| Network | Onboard gigabit (wired, enp4s0) + wifi |
+| OS | Ubuntu Server 26.04 LTS |
+| Network | Onboard gigabit (wired) + wifi |
 
 **Done**
 
 - Fresh Ubuntu Server install
-- Netplan config to bring up the wired interface (enp4s0), replacing the
-  wifi-only setup; SSH from the desktop confirmed
+- Netplan config to bring up the wired interface, replacing the wifi-only
+  setup; SSH from the desktop confirmed
 - Extended the root volume — the installer only allocated 100 GB of the 235 GB
   volume group; fixed with `lvextend -l +100%FREE` and `resize2fs`
 - Disabled `systemd-networkd-wait-online.service` (it blocked boot for over a
