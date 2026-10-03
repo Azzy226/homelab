@@ -61,12 +61,12 @@ Palworld dedicated server live and reachable.
 - System fully updated
 - Services moved to Docker; Palworld dedicated server running and connectable
 - lab-sandbox container environment up (see [Sandbox](#sandbox))
+- Verified at the router: only UDP 8211 is forwarded to pal-001; DMZ disabled
 
 **Pending**
 
 - Router hardening: disable UPnP, change admin password, set a DHCP reservation
   for pal-001
-- Confirm the UDP 8211 forward and a Palworld-specific firewall rule
 - 1 TB SanDisk Extreme (SDSSDE70) as `/srv/data`, currently `sda`, unformatted
 
 ### workstation
