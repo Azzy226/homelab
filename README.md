@@ -26,7 +26,7 @@ flowchart LR
     SW --> SRV[pal-001]
     subgraph PALC[pal-001 containers]
         GAME[Palworld server]
-        SBX[lab-sandbox]
+        SBX[Kali]
     end
     SRV --> PALC
 ```
@@ -60,7 +60,7 @@ Palworld dedicated server live and reachable.
 - Locked down the firewall with ufw — SSH restricted to the LAN, default deny
 - System fully updated
 - Services moved to Docker; Palworld dedicated server running and connectable
-- lab-sandbox container environment up (see [Sandbox](#sandbox))
+- Kali desktop running in a container (see [Kali](#kali))
 - Verified at the router: only UDP 8211 is forwarded to pal-001; DMZ disabled
 
 **Pending**
@@ -81,8 +81,9 @@ Daily driver.
 | Disk | 1.82 TB |
 | OS | Windows 11 |
 
-## Sandbox
+## Kali
 
-`lab-sandbox` is an isolated container environment on pal-001 for testing and
-tooling, kept separate from the game server. It runs under Docker and is bound
-to the LAN interface only — it is not exposed to the WAN.
+A Kali desktop runs in a container on pal-001 for security testing and tooling,
+kept separate from the game server. It runs under Docker and is bound to the LAN
+interface only — it is not exposed to the WAN, and is reached over the home
+network with its own login.
