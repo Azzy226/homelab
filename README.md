@@ -18,17 +18,26 @@ pal-001; all management ports (RCON, the REST API, SSH) stay LAN-only.
 Firewall (pal-001): ufw enabled, SSH restricted to the LAN subnet, all other
 inbound denied by default.
 
+All the lab services run on pal-001 (the laptop). The workstation is the control
+point — it runs no lab services itself; it's how everything on pal-001 is
+reached, over the LAN, by SSH for the terminal and a browser for Kali's desktop
+and the sandbox targets.
+
 ```mermaid
 flowchart LR
-    ONT[ONT] --> RTR[Router]
+    NET[Internet] -->|UDP 8211 only| RTR[Calix gateway]
     RTR --> SW[8-port switch]
-    SW --> WS[workstation]
-    SW --> SRV[pal-001]
-    subgraph PALC[pal-001 containers]
+    SW --> WS[workstation / main PC]
+    SW --> SRV[pal-001 / laptop server]
+
+    subgraph PALC[pal-001 — Docker]
         GAME[Palworld server]
-        SBX[Kali]
+        KALI[Kali desktop]
+        SBX[sandbox / targets]
     end
     SRV --> PALC
+
+    WS -. SSH + browser .-> SRV
 ```
 
 ## Hosts
@@ -61,6 +70,7 @@ Palworld dedicated server live and reachable.
 - System fully updated
 - Services moved to Docker; Palworld dedicated server running and connectable
 - Kali desktop running in a container (see [Kali](#kali))
+- Sandbox for practice targets set up (see [Sandbox](#sandbox))
 - Verified at the router: only UDP 8211 is forwarded to pal-001; DMZ disabled
 
 **Pending**
@@ -71,7 +81,9 @@ Palworld dedicated server live and reachable.
 
 ### workstation
 
-Daily driver.
+Daily driver, and the control point for the lab — the machine used to reach
+everything on pal-001 (SSH for the terminal, a browser for Kali's desktop and
+the sandbox targets). It runs no lab services itself.
 
 | | |
 | --- | --- |
@@ -85,5 +97,12 @@ Daily driver.
 
 A Kali desktop runs in a container on pal-001 for security testing and tooling,
 kept separate from the game server. It runs under Docker and is bound to the LAN
-interface only — it is not exposed to the WAN, and is reached over the home
-network with its own login.
+interface only — it is not exposed to the WAN, and is reached from the
+workstation's browser over the home network, with its own login.
+
+## Sandbox
+
+A separate area on pal-001 for deliberately vulnerable practice targets, kept
+apart from Kali and the game server. Targets run in their own containers, bound
+to the LAN only and never exposed to the WAN, and are brought up only when in
+use.
