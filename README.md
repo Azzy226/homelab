@@ -1,19 +1,22 @@
 # homelab
 
-Notes on my home lab. Hardware, network layout, and what's running on it.
+Notes on my home lab — hardware, network layout, and what's running on it.
 
 ## Network
 
 ```
 Fiber -> ONT -> Router -> 8-port unmanaged switch
-                            LAN 1  router uplink
-                            LAN 2  workstation
-                            LAN 3  pal-001
-                            LAN 4-8  free
+                            LAN 1   router uplink
+                            LAN 2   workstation
+                            LAN 3   pal-001
+                            LAN 4-8 free
 ```
 
- Flat Net work Nothing forwarded from the WAN side yet. Planned: UDP 8211 to pal-001 for
-Palworld. RCON (TCP 25575) and REST API (TCP 8212) stay closed..
+Flat network. Nothing is forwarded from the WAN side yet. Planned: UDP 8211 to
+pal-001 for Palworld. RCON (TCP 25575) and the REST API (TCP 8212) stay closed.
+
+Firewall (pal-001): ufw enabled, SSH restricted to the LAN (192.168.0.0/16),
+all other inbound denied by default.
 
 ```mermaid
 flowchart LR
@@ -21,35 +24,50 @@ flowchart LR
     RTR --> SW[8-port switch]
     SW --> WS[workstation]
     SW --> SRV[pal-001]
+    subgraph PALC[pal-001 containers]
+        GAME[Palworld server]
+        SBX[lab-sandbox]
+    end
+    SRV --> PALC
 ```
 
 ## Hosts
 
 ### pal-001
 
-Lenovo ThinkPad E15 Gen 2, running as the lab server.
+Lenovo ThinkPad E15 Gen 2, running as the lab server. Status: up, with the
+Palworld dedicated server live and reachable.
 
 | | |
 | --- | --- |
 | CPU | Intel i5-1135G7, 4C/8T, 2.4 GHz |
-| RAM | 8 GB (7.0 GiB usable) (will add more soon) |
+| RAM | 8 GB (7.0 GiB usable), adding more soon |
 | Swap | 4 GB |
 | Disk | 238.5 GB NVMe, LVM, 232 GB root |
 | OS | Ubuntu Server 26.04.1 LTS, kernel 7.0.0-30 |
-| Network | Onboard gigabit, wifi |
+| Network | Onboard gigabit (wired, enp4s0) + wifi |
 
-Notes:
+**Done**
 
-- Installer only allocated 100 GB of the 235 GB volume group. Extended with
-  `lvextend -l +100%FREE` and `resize2fs`.
-- `systemd-networkd-wait-online.service` disabled. It blocked boot for over a
-  minute with no configured interface.
+- Fresh Ubuntu Server install
+- Netplan config to bring up the wired interface (enp4s0), replacing the
+  wifi-only setup; SSH from the desktop confirmed
+- Extended the root volume — the installer only allocated 100 GB of the 235 GB
+  volume group; fixed with `lvextend -l +100%FREE` and `resize2fs`
+- Disabled `systemd-networkd-wait-online.service` (it blocked boot for over a
+  minute with no configured interface)
+- Lid-close no longer suspends the machine (`/etc/systemd/logind.conf`)
+- Locked down the firewall with ufw — SSH restricted to the LAN, default deny
+- System fully updated
+- Services moved to Docker; Palworld dedicated server running and connectable
+- lab-sandbox container environment up (see [Sandbox](#sandbox))
 
-Pending:
+**Pending**
 
-- Netplan config for the wired interface
+- Router hardening: disable UPnP, change admin password, set a DHCP reservation
+  for pal-001
+- Confirm the UDP 8211 forward and a Palworld-specific firewall rule
 - 1 TB SanDisk Extreme (SDSSDE70) as `/srv/data`, currently `sda`, unformatted
-- Palworld dedicated server
 
 ### workstation
 
@@ -61,28 +79,10 @@ Daily driver.
 | GPU | NVIDIA RTX 2060 SUPER, 8 GB |
 | RAM | 32 GB DDR4, going to 64 GB |
 | Disk | 1.82 TB |
-| OS | Windows 11, Kali Purple |
+| OS | Windows 11 |
 
-## Update — Home Server (pal-001)
+## Sandbox
 
-**Hardware:** Lenovo ThinkPad E15 Gen 2 — Intel i5-1135G7 (4C/8T), 8GB RAM, 238GB NVMe
-
-**OS:** Ubuntu Server 26.04.1 LTS
-
-**Network:** ONT → router → 8-port switch → pal-001 (wired, static reservation planned)
-
-**Status: server is up and running — Palworld dedicated server is live and reachable**
-
-### Done
-- Fresh Ubuntu Server install
-- Fixed empty netplan config to bring up wired ethernet (enp4s0), replacing wifi-only setup
-- SSH access confirmed from desktop
-- Fixed lid-close behavior — closing the lid no longer suspends the machine (`/etc/systemd/logind.conf`)
-- Locked down firewall with ufw — SSH restricted to LAN (192.168.0.0/16) only, all other inbound denied by default
-- System fully updated
-- Palworld dedicated server running and connectable
-
-### Next
-- Router hardening (disable UPnP, change admin password, set DHCP reservation for pal-001)
-- Confirm UDP 8211 forward and firewall rule for Palworld specifically
-- Docker migration for services (optional)
+`lab-sandbox` is an isolated container environment on pal-001 for testing and
+tooling, kept separate from the game server. It runs under Docker and is bound
+to the LAN interface only — it is not exposed to the WAN.
